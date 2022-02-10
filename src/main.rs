@@ -1,15 +1,18 @@
 use sekkei::game::Mods;
-use std::env;
+use std::{
+        env,
+        path::{Path, PathBuf},
+};
 
 mod game;
 mod calculator;
 
 /// UTIL FUNCTIONS ///
 
-fn get_path(file: &str) -> String {
+fn get_path<P: AsRef<Path>>(file: P) -> PathBuf {
     let dir = env::current_dir().unwrap();
 
-    return format!("{}/{}", dir.to_str().unwrap(), file);
+    dir.join(file)
 }
 
 fn without_first(string: &str) -> &str {
@@ -42,72 +45,82 @@ fn main() {
 
     // for loop possible args
     let mut iter = args.iter();
-    let mut arg_type = "";
+    let arg_type;
 
     // ignore first result
     &iter.next();
 
-    if let Some(arg_type_indicator) = iter.next() {
-        println!("{}", arg_type_indicator);
-        if arg_type_indicator == &"difficulty" {
-            arg_type = "d";
-        } else if arg_type_indicator == &"performance" {
-            arg_type = "p";
-        } else {
-            println!("Invalid calculator type");
-            return;
-        }
+    arg_type = match iter.next().map(|s| &**s) {
+        Some("difficulty") => "d",
+        Some("performance") => "p",
+        Some(_) => {
+                eprintln!("Invalid calculator type");
+                return;
+        },
+        None => {
+                eprintln!("Too few arguments");
+                return;
+        },
+    };
 
-        for item in iter {
-            if item.starts_with("+") {
-                // mods
-                let string = without_first(item.as_str());
-    
-                for modstr in split_by(string, 2) {
-                    mods += Mods::from_str(modstr) as i32;
-                }
-            } else if item.ends_with("%") {
-                if arg_type == "d" {
-                    // ignore because type is difficulty
-                    continue;
-                }
+    println!("{}", arg_type);
 
-                // accuracy
-                // remove first char
-                let mut string = item.clone();
-                string.pop();
-    
-                // parse
-                acc = string.parse().unwrap_or(100.0);
-            } else if item.ends_with("x") {
-                if arg_type == "d" {
-                    // ignore because type is difficulty
-                    continue;
-                }
+    let file_path = if let Some(path) = iter.next() {
+        get_path(path)
+    } else {
+        eprintln!("Too few arguments");
+        return;
+    };
 
-                // combo
-                // remove first char
-                let mut string = item.clone();
-                string.pop();
-    
-                // parse
-                combo = string.parse().unwrap_or(-1);
-            } else if item.ends_with("m") {
-                if arg_type == "d" {
-                    // ignore because type is difficulty
-                    continue;
-                }
+    for item in iter {
+        if item.starts_with("+") {
+            // mods
+            let string = without_first(item.as_str());
 
-                // misses
-                // remove first char
-                let mut string = item.clone();
-                string.pop();
-    
-                // parse
-                misses = string.parse().unwrap_or(0);
+            for modstr in split_by(string, 2) {
+                mods += Mods::from_str(modstr) as i32;
             }
+        } else if item.ends_with("%") {
+            if arg_type == "d" {
+                // ignore because type is difficulty
+                continue;
+            }
+
+            // accuracy
+            // remove first char
+            let mut string = item.clone();
+            string.pop();
+
+            // parse
+            acc = string.parse().unwrap_or(100.0);
+        } else if item.ends_with("x") {
+            if arg_type == "d" {
+                // ignore because type is difficulty
+                continue;
+            }
+
+            // combo
+            // remove first char
+            let mut string = item.clone();
+            string.pop();
+
+            // parse
+            combo = string.parse().unwrap_or(-1);
+        } else if item.ends_with("m") {
+            if arg_type == "d" {
+                // ignore because type is difficulty
+                continue;
+            }
+
+            // misses
+            // remove first char
+            let mut string = item.clone();
+            string.pop();
+
+            // parse
+            misses = string.parse().unwrap_or(0);
         }
-    
-        println!("{} {} {} {} {}", get_path(args[2].as_str()), mods, acc, combo, misses);
     }
+
+    println!("{:?} {} {} {} {}", file_path, mods, acc, combo, misses);
 }
