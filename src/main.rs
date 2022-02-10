@@ -1,11 +1,16 @@
-use sekkei::game::Mods;
+use sekkei::{
+    parser::beatmap::{
+        BeatmapFile
+    },
+    game::Mods
+};
 use std::{
         env,
         path::{Path, PathBuf},
 };
 
 mod game;
-mod calculator;
+mod difficulty;
 
 /// UTIL FUNCTIONS ///
 
@@ -121,6 +126,16 @@ fn main() {
             misses = string.parse().unwrap_or(0);
         }
     }
+
+    // parse the beatmap
+    let beatmap = BeatmapFile::from_pathbuf(file_path.clone());
+
+    // handle the calculations
+    if arg_type == "d" {
+        // parse the beatmap
+    } else {
+    }
+
 
     println!("{:?} {} {} {} {}", file_path, mods, acc, combo, misses);
 }
