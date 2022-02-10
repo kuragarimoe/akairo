@@ -22,9 +22,8 @@ pub mod skills;
 
 pub struct StandardDifficultyCalculator {
     // internal values
-    pub beatmap: BeatmapFile,
     pub time_rate: f64,
-    
+
     // difficulty hit object vlaues
     pub travel_distance: f32,
     pub jump_distance: f32,
@@ -34,9 +33,7 @@ pub struct StandardDifficultyCalculator {
 }
 
 impl StandardDifficultyCalculator {
-    fn calculate(&mut self, beatmap: BeatmapFile, mods: i32) -> Option<StandardResult> {
-        self.beatmap = beatmap;
-
+    fn calculate(&mut self, beatmap: &BeatmapFile, mods: i32) -> Option<StandardResult> {
         // constants
         let section_number = 400;
         let difficulty_multiplier = 0.0675;
@@ -52,7 +49,7 @@ impl StandardDifficultyCalculator {
 
         // create skills
         //self.create_skills(mods);
-        self.create_hit_objects(self.beatmap.hit_objects);
+        self.create_hit_objects(beatmap);
 
 
         None
@@ -62,21 +59,18 @@ impl StandardDifficultyCalculator {
         let skill_vec = vec![];
     }*/
 
-    fn create_hit_objects(self, hit_objects: Vec<HitObject>) -> Vec<DifficultyHitObject> {
+    fn create_hit_objects<'beatmap>(&self, beatmap: &'beatmap BeatmapFile) -> Vec<DifficultyHitObject<'beatmap>> {
         // constants
         let normalized_radius = 52.0;
-        let diff_hit_objects = vec![];
+        let mut diff_hit_objects = Vec::new();
 
-        let mut previous_hit_object: Option<DifficultyHitObject> = None;
-
-        for i in 0..hit_objects.len() {
-            let hit_object = hit_objects[i];
-            let scalingFactor = (52.0);
+        for (i, obj) in beatmap.hit_objects.iter().enumerate() {
+            let scaling_factor = 52.0;
 
             diff_hit_objects.push(DifficultyHitObject {
-                current_hit_object: hit_objects.get(i),
-                previous_hit_object: hit_objects.get(i - 1),
-                second_previous_hit_object: hit_objects.get(i - 1),
+                current_hit_object: obj,
+                previous_hit_object: beatmap.hit_objects.get(i - 1),
+                second_previous_hit_object: beatmap.hit_objects.get(i - 2),
             })
 
         }
