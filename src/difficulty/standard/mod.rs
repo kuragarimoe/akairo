@@ -51,7 +51,8 @@ impl StandardDifficultyCalculator {
         }
 
         // create skills
-        self.create_skills(mods);
+        //self.create_skills(mods);
+        self.create_hit_objects(self.beatmap.hit_objects);
 
 
         None
@@ -68,14 +69,14 @@ impl StandardDifficultyCalculator {
 
         let mut previous_hit_object: Option<DifficultyHitObject> = None;
 
-        for i in 0..self.beatmap.hit_objects.len() {
-            let hit_object = &self.beatmap.hit_objects[i];
+        for i in 0..hit_objects.len() {
+            let hit_object = hit_objects[i];
             let scalingFactor = (52.0);
 
             diff_hit_objects.push(DifficultyHitObject {
-                current_hit_object: self.beatmap.hit_objects.get(i).clone(),
-                previous_hit_object: self.beatmap.hit_objects.clone().get(i - 1),
-                second_previous_hit_object: self.beatmap.hit_objects.clone().get(i - 1),
+                current_hit_object: hit_objects.get(i),
+                previous_hit_object: hit_objects.get(i - 1),
+                second_previous_hit_object: hit_objects.get(i - 1),
             })
 
         }
